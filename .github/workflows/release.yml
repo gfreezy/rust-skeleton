@@ -72,7 +72,7 @@ jobs:
       TARGET_DIR: ./target
       # Emit backtraces on panics.
       RUST_BACKTRACE: 1
-      BINARY_NAME: http
+      BINARY_NAME: rust-workflow
     strategy:
       matrix:
         include:
