@@ -27,6 +27,10 @@ jobs:
           cargo fmt --all -- --check
           cargo clippy
 
+      - name: Check clippy
+        run: |
+          cargo clippy
+
   test:
     name: test
     needs: ['rustfmt']
