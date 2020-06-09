@@ -154,7 +154,7 @@ jobs:
           echo "release version: $RELEASE_VERSION"
 
       - name: Build cross docker images
-        if: matrix.target != ''
+        if: matrix.target != '' and matrix.target != 'x86_64-apple-darwin'
         run: cd ci/docker/${{ matrix.target }} && ./build
 
       - name: Build release binary
