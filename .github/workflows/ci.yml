@@ -61,6 +61,7 @@ jobs:
           - build: macos
             os: macos-latest
             rust: nightly
+
 #          - build: beta
 #            os: ubuntu-18.04
 #            rust: beta
