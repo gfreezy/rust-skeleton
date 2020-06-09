@@ -108,7 +108,8 @@ jobs:
           override: true
 
       - name: Build cross docker images
-        run: [ -d ci/docker/${{ matrix.target }} ] && cd ci/docker/${{ matrix.target }} && ./build
+        run: |
+          [ -d ci/docker/${{ matrix.target }} ] && cd ci/docker/${{ matrix.target }} && ./build
 
       - name: Use Cross
         if: matrix.target != ''
