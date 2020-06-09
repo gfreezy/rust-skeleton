@@ -121,6 +121,7 @@ jobs:
       # (like shell completions and man pages) aren't generated.
       - name: Show build.rs stderr
         shell: bash
+        continue-on-error: true
         run: |
           set +x
           stderr="$(find "${{ env.TARGET_DIR }}/debug" -name stderr -print0 | xargs -0 ls -t | head -n1)"
