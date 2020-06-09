@@ -154,8 +154,7 @@ jobs:
           echo "release version: $RELEASE_VERSION"
 
       - name: Build cross docker images
-        if: matrix.target != '' and matrix.target != 'x86_64-apple-darwin'
-        run: cd ci/docker/${{ matrix.target }} && ./build
+        run: [ -d ci/docker/${{ matrix.target }} ] && cd ci/docker/${{ matrix.target }} && ./build
 
       - name: Build release binary
         run: ${{ env.CARGO }} build --verbose --release ${{ env.TARGET_FLAGS }}
