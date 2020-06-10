@@ -14,4 +14,7 @@ image = "ci/cross:arm-unknown-linux-gnueabihf"
 passthrough = [
     "RUST_BACKTRACE",
     "RUST_LOG",
+    {%- for env in cookiecutter.env %}
+    {{env}},
+    {% endfor -%}
 ]

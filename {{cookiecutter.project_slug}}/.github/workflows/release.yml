@@ -36,21 +36,21 @@ jobs:
           #
           # See: https://github.community/t5/GitHub-Actions/How-to-get-just-the-tag-name/m-p/32167/highlight/true#M1027
           echo "::set-env name=VERSION::${GITHUB_REF#refs/tags/}"
-          echo "version is: ${{ env.VERSION }}"
+          echo "version is: {{'${{'}} env.VERSION }}"
       - name: Create GitHub release
         id: release
         uses: actions/create-release@v1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: {{'${{'}} secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: ${{ env.VERSION }}
+          tag_name: {{'${{'}} env.VERSION }}
+          release_name: {{'${{'}} env.VERSION }}
 
       - name: Save release upload URL to artifact
-        run: echo "${{ steps.release.outputs.upload_url }}" > artifacts/release-upload-url
+        run: echo "{{'${{'}} steps.release.outputs.upload_url }}" > artifacts/release-upload-url
 
       - name: Save version number to artifact
-        run: echo "${{ env.VERSION }}" > artifacts/release-version
+        run: echo "{{'${{'}} env.VERSION }}" > artifacts/release-version
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v1
@@ -61,7 +61,7 @@ jobs:
   build-release:
     name: build-release
     needs: ['create-release']
-    runs-on: ${{ matrix.os }}
+    runs-on: {{'${{'}} matrix.os }}
     env:
       # For some builds, we use cross to test on 32-bit and big-endian
       # systems.
@@ -72,35 +72,19 @@ jobs:
       TARGET_DIR: ./target
       # Emit backtraces on panics.
       RUST_BACKTRACE: 1
-      BINARY_NAME: rust-workflow
+      BINARY_NAME: {{cookiecutter.project_slug}}
+      {%- for k, v in cookiecutter.env.items() %}
+      {{k}}:{{v}}
+      {% endfor -%}
     strategy:
       matrix:
         include:
-          - build: linux
-            os: ubuntu-18.04
-            rust: nightly
-            target: x86_64-unknown-linux-musl
-          - build: macos
-            os: macos-latest
-            rust: nightly
-            target: x86_64-apple-darwin
-#          - build: linux-arm
-#            os: ubuntu-18.04
-#            rust: nightly
-#            target: arm-unknown-linux-gnueabihf
-#          - build: win-msvc
-#            os: windows-2019
-#            rust: nightly
-#            target: x86_64-pc-windows-msvc
-#          - build: win-gnu
-#            os: windows-2019
-#            rust: nightly-x86_64-gnu
-#            target: x86_64-pc-windows-gnu
-#          - build: win32-msvc
-#            os: windows-2019
-#            rust: nightly
-#            target: i686-pc-windows-msvc
-
+          {%for name, build in cookiecutter.release_matrix.items() -%}
+          - build: {{name}}
+          {%- for k, v in build.items() %}
+          {{k}}: {{v}}
+          {%endfor-%}
+          {%-endfor%}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -118,10 +102,10 @@ jobs:
       - name: Install Rust
         uses: actions-rs/toolchain@v1
         with:
-          toolchain: ${{ matrix.rust }}
+          toolchain: {{'${{'}} matrix.rust }}
           profile: minimal
           override: true
-          target: ${{ matrix.target }}
+          target: {{'${{'}} matrix.target }}
 
       - name: Use Cross
         # if: matrix.os != 'windows-2019'
@@ -130,13 +114,13 @@ jobs:
           # See: https://github.com/rust-embedded/cross/issues/357
           cargo install --git https://github.com/rust-embedded/cross
           echo "::set-env name=CARGO::cross"
-          echo "::set-env name=TARGET_FLAGS::--target ${{ matrix.target }}"
-          echo "::set-env name=TARGET_DIR::./target/${{ matrix.target }}"
+          echo "::set-env name=TARGET_FLAGS::--target {{'${{'}} matrix.target }}"
+          echo "::set-env name=TARGET_DIR::./target/{{'${{'}} matrix.target }}"
       - name: Show command used for Cargo
         run: |
-          echo "cargo command is: ${{ env.CARGO }}"
-          echo "target flag is: ${{ env.TARGET_FLAGS }}"
-          echo "target dir is: ${{ env.TARGET_DIR }}"
+          echo "cargo command is: {{'${{'}} env.CARGO }}"
+          echo "target flag is: {{'${{'}} env.TARGET_FLAGS }}"
+          echo "target dir is: {{'${{'}} env.TARGET_DIR }}"
       - name: Get release download URL
         uses: actions/download-artifact@v1
         with:
@@ -156,45 +140,45 @@ jobs:
       - name: Build cross docker images
         if: matrix.target != ''
         run: |
-          [ -d ci/docker/${{ matrix.target }} ] && cd ci/docker/${{ matrix.target }} && ./build || true
+          [ -d ci/docker/{{'${{'}} matrix.target }} ] && cd ci/docker/{{'${{'}} matrix.target }} && ./build || true
 
       - name: Build release binary
-        run: ${{ env.CARGO }} build --verbose --release ${{ env.TARGET_FLAGS }}
+        run: {{'${{'}} env.CARGO }} build --verbose --release {{'${{'}} env.TARGET_FLAGS }}
 
       - name: Strip release binary (linux and macos)
-        if: matrix.build == 'linux' || matrix.build == 'macos'
-        run: strip "target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}"
+        if: matrix.target == 'x86_64-unknown-linux-musl' || matrix.target == 'x86_64-apple-darwin'
+        run: strip "target/{{'${{'}} matrix.target }}/release/{{'${{'}} env.BINARY_NAME }}"
 
       - name: Strip release binary (arm)
-        if: matrix.build == 'linux-arm'
+        if: matrix.target == 'arm-unknown-linux-gnueabihf'
         run: |
           docker run --rm -v \
             "$PWD/target:/target:Z" \
             rustembedded/cross:arm-unknown-linux-gnueabihf \
             arm-linux-gnueabihf-strip \
-            /target/arm-unknown-linux-gnueabihf/release/${{ env.BINARY_NAME }}
+            /target/arm-unknown-linux-gnueabihf/release/{{'${{'}} env.BINARY_NAME }}
       - name: Build archive
         shell: bash
         run: |
-          outdir="$(ci/cargo-out-dir "${{ env.TARGET_DIR }}")"
-          staging="${{ env.BINARY_NAME }}-${{ env.RELEASE_VERSION }}-${{ matrix.target }}"
+          outdir="$(ci/cargo-out-dir "{{'${{'}} env.TARGET_DIR }}")"
+          staging="{{'${{'}} env.BINARY_NAME }}-{{'${{'}} env.RELEASE_VERSION }}-{{'${{'}} matrix.target }}"
           mkdir -p "$staging"
 
-          if [ "${{ matrix.os }}" = "windows-2019" ]; then
-            cp "target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}.exe" "$staging/"
+          if [ "{{'${{'}} matrix.os }}" = "windows-2019" ]; then
+            cp "target/{{'${{'}} matrix.target }}/release/{{'${{'}} env.BINARY_NAME }}.exe" "$staging/"
             7z a "$staging.zip" "$staging"
             echo "::set-env name=ASSET::$staging.zip"
           else
-            cp "target/${{ matrix.target }}/release/${{ env.BINARY_NAME }}" "$staging/"
+            cp "target/{{'${{'}} matrix.target }}/release/{{'${{'}} env.BINARY_NAME }}" "$staging/"
             tar czf "$staging.tar.gz" "$staging"
             echo "::set-env name=ASSET::$staging.tar.gz"
           fi
       - name: Upload release archive
         uses: actions/upload-release-asset@v1.0.1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: {{'${{'}} secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ env.RELEASE_UPLOAD_URL }}
-          asset_path: ${{ env.ASSET }}
-          asset_name: ${{ env.ASSET }}
+          upload_url: {{'${{'}} env.RELEASE_UPLOAD_URL }}
+          asset_path: {{'${{'}} env.ASSET }}
+          asset_name: {{'${{'}} env.ASSET }}
           asset_content_type: application/octet-stream

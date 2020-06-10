@@ -1,0 +1,51 @@
+{
+  "full_name": "gfreezy",
+  "email": "gfreezy@gmail.com",
+  "project_name": "Rust Skeleton",
+  "project_slug": "{{ cookiecutter.project_name.lower().replace(' ', '_').replace('-', '_') }}",
+  "project_short_description": "Rust Skeleton contains all the boilerplate you need to create a Rust binary.",
+  "version": "0.1.0",
+  "env": {
+    "OPENSSL_STATIC": "true"
+  },
+  "ci_matrix": {
+    "macos-stable": {
+      "os": "macos-latest",
+      "rust": "stable"
+    },
+    "macos-nightly": {
+      "os": "macos-latest",
+      "rust": "nightly"
+    },
+    "ubuntu-sable": {
+      "os": "ubuntu-18.04",
+      "rust": "stable"
+    },
+    "ubuntu-nightly": {
+      "os": "ubuntu-18.04",
+      "rust": "nightly"
+    },
+    "nightly-musl": {
+      "os": "ubuntu-18.04",
+      "rust": "nightly",
+      "target": "x86_64-unknown-linux-musl"
+    }
+  },
+  "release_matrix": {
+    "linux": {
+      "os": "ubuntu-18.04",
+      "rust": "nightly",
+      "target": "x86_64-unknown-linux-musl"
+    },
+    "macos": {
+      "os": "macos-latest",
+      "rust": "nightly",
+      "target": "x86_64-apple-darwin"
+    },
+    "linux-arm": {
+      "os": "ubuntu-18.04",
+      "rust": "nightly",
+      "target": "arm-unknown-linux-gnueabihf"
+    }
+  }
+}

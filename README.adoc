@@ -1,0 +1,11 @@
+= Rust Skeleton
+
+== Prerequisites
+----
+pip install cookiecutter
+----
+
+== Usage
+----
+cookiecutter https://github.com/gfreezy/rust-skeleton
+----

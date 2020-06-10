@@ -17,7 +17,7 @@ At this point, subsequent uses of `cross` will now use your built image since
 Docker prefers local images over remote images. In order to make these changes
 stick, they need to be pushed to Docker Hub:
 
-    $ docker push burntsushi/cross:x86_64-unknown-linux-musl
+    $ docker push ci/cross:x86_64-unknown-linux-musl
 
 Of course, only I (BurntSushi) can push to that location. To make `cross` use
 a different location, then edit `Cross.toml` in the root of this repo to use
